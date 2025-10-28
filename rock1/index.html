@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocketry Ground Station</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <svg class="rocket-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <div>
+                    <h1 class="title">Ground Station Control</h1>
+                    <p class="subtitle">Competition Telemetry System</p>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <select id="portSelect" class="control-select">
+                    <option value="">Select COM Port</option>
+                </select>
+                
+                <select id="baudRate" class="control-select">
+                    <option value="115200">115200</option>
+                </select>
+                <button id="connectBtn" class="btn btn-connect">
+                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    Connect
+                </button>
+                <button id="telemetryBtn" class="btn btn-telemetry" disabled>
+                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0"/>
+                    </svg>
+                    Enable Telemetry
+                </button>
+            </div>
+        </div>
+    </header>
+    <div class="main-container">
+        <aside class="sidebar-left">
+            <div class="logo-card">
+                <img src="isro.png" alt="ISRO">
+            </div>
+            <div class="logo-card">
+                <img src="cbit.png" alt="CBIT">
+            </div>
+            <div class="logo-card">
+                <img src="arka_logo.jpeg" alt="ARKA">
+            </div>
+            <div class="logo-card">
+                <img src="indian_flag.jpg" alt="India">
+            </div>
+            <div class="sidebar-controls">
+                <button id="zeroSetBtn" class="btn btn-warning" disabled>Zero-Set Sensors</button>
+                <button id="downloadBtn" class="btn btn-download" disabled>
+                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download CSV
+                </button>
+            </div>
+        </aside>
+        <main class="content">
+            <div class="status-bar">
+                <div class="status-card">
+                    <div class="status-label">Time</div>
+                    <div class="status-value" id="timeValue">--:--:--</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-label">Packet #</div>
+                    <div class="status-value" id="packetValue">0</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-label">Flight State</div>
+                    <div class="status-badge" id="stateBadge">IDLE</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-label">Servo Status</div>
+                    <div class="status-badge" id="servoBadge">NOT DEPLOYED</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-label">Connection</div>
+                    <div class="status-value" id="connectionStatus">INACTIVE</div>
+                </div>
+            </div>
+            <div class="flight-timeline">
+                <div class="timeline-item" data-state="0">
+                    <div class="timeline-circle">0</div>
+                    <div class="timeline-label">IDLE</div>
+                </div>
+                <div class="timeline-item" data-state="1">
+                    <div class="timeline-circle">1</div>
+                    <div class="timeline-label">LAUNCH</div>
+                </div>
+                <div class="timeline-item" data-state="2">
+                    <div class="timeline-circle">2</div>
+                    <div class="timeline-label">ASCENT</div>
+                </div>
+                <div class="timeline-item" data-state="3">
+                    <div class="timeline-circle">3</div>
+                    <div class="timeline-label">DESCENT</div>
+                </div>
+                <div class="timeline-item" data-state="4">
+                    <div class="timeline-circle">4</div>
+                    <div class="timeline-label">RECOVERY</div>
+                </div>
+            </div>
+            <div class="graphs-grid">
+                <div class="graph-card">
+                    <h3>Altitude vs Time (m)</h3>
+                    <canvas id="altitudeChart"></canvas>
+                    <div class="current-value" id="altValue">0.00 m</div>
+                </div>
+                <div class="graph-card">
+                    <h3>Pressure vs Time (Pa)</h3>
+                    <canvas id="pressureChart"></canvas>
+                    <div class="current-value" id="pressValue">0.00 Pa</div>
+                </div>
+                <div class="graph-card">
+                    <h3>Temperature vs Time (°C)</h3>
+                    <canvas id="tempChart"></canvas>
+                    <div class="current-value" id="tempValue">0.00 °C</div>
+                </div>
+                <div class="graph-card">
+                    <h3>Velocity vs Time (m/s)</h3>
+                    <canvas id="velocityChart"></canvas>
+                    <div class="current-value" id="velValue">0.00 m/s</div>
+                </div>
+                <div class="graph-card">
+                    <h3>Acceleration vs Time (m/s²)</h3>
+                    <canvas id="accelChart"></canvas>
+                    <div class="current-values-small">
+                        <span>Ax: <span id="axValue">0.00</span></span>
+                        <span>Ay: <span id="ayValue">0.00</span></span>
+                        <span>Az: <span id="azValue">0.00</span></span>
+                    </div>
+                </div>
+                <div class="graph-card">
+                    <h3>Gyroscope vs Time (rad/s)</h3>
+                    <canvas id="gyroChart"></canvas>
+                    <div class="current-values-small">
+                        <span>Gx: <span id="gxValue">0.00</span></span>
+                        <span>Gy: <span id="gyValue">0.00</span></span>
+                        <span>Gz: <span id="gzValue">0.00</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="map-card">
+                <h3>
+                    <svg class="icon-inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0"/>
+                    </svg>
+                    GPS Location Map
+                </h3>
+                <div class="map-display">
+                    <div class="map-icon">🗺️</div>
+                    <div class="gps-values">
+                        <div class="gps-item">
+                            <div class="gps-label">Latitude</div>
+                            <div class="gps-value" id="latValue">0.000000°</div>
+                        </div>
+                        <div class="gps-item">
+                            <div class="gps-label">Longitude</div>
+                            <div class="gps-value" id="lonValue">0.000000°</div>
+                        </div>
+                    </div>
+                    <div class="map-note">Integrate with mapping API for visual tracking</div>
+                </div>
+            </div>
+        </main>
+        <aside class="sidebar-right">
+            <div class="log-header">
+                <h3>Live Telemetry Log</h3>
+                <div class="log-count">Total Packets: <span id="logCount">0</span></div>
+            </div>
+            <div class="log-content">
+                <table id="logTable">
+                    <thead>
+                        <tr>
+                            <th>Pkt</th>
+                            <th>Time</th>
+                            <th>Alt(m)</th>
+                            <th>State</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logBody">
+                    </tbody>
+                </table>
+                <div id="noDataMessage" class="no-data">
+                    <svg class="no-data-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
+                    </svg>
+                    <p>No telemetry data received yet.<br>Enable telemetry to start logging.</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
